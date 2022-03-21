@@ -20,7 +20,7 @@ interface BookingRepository : JpaRepository<BookingLogRecord, UUID> {
 
     @Transactional
     @Modifying(flushAutomatically = true)
-    @Query("DELETE FROM booking_log_record WHERE order_id = ?1"
+    @Query("DELETE FROM booking_log_record WHERE booking_id = ?1"
         ,nativeQuery = true)
     fun deleteByOrderId(orderId: UUID)
 }
