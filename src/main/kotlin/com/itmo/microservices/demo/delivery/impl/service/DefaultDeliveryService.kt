@@ -81,7 +81,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         .description("Current shipping orders")
         .register(meterRegistry)
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 2000)
     override fun checkForRefund() {
         val orders = orderRepository.findAll()
         for (order in orders){
