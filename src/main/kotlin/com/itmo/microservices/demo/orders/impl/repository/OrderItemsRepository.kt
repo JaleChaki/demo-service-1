@@ -15,9 +15,5 @@ interface OrderItemsRepository : JpaRepository<OrderItems, UUID>, JpaSpecificati
     @Query("FROM OrderItems WHERE orderId = ?1")
     fun findByOrderId(OrderId: UUID): List<OrderItems>
 
-    @Transactional
-    @Modifying(flushAutomatically = true)
-    @Query("DELETE FROM order_items WHERE order_id = ?1"
-        ,nativeQuery = true)
-    fun deleteByOrderId(OrderId: UUID)
+
 }

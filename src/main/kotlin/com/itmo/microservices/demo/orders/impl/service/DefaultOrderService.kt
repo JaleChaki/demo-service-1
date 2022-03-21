@@ -21,6 +21,7 @@ import com.itmo.microservices.demo.stock.api.event.BookingEvent
 import com.itmo.microservices.demo.stock.api.event.DeductItemEvent
 import com.itmo.microservices.demo.stock.api.model.BookingStatus
 import com.itmo.microservices.demo.stock.api.service.StockItemService
+import com.itmo.microservices.demo.stock.impl.repository.BookingRepository
 import com.itmo.microservices.demo.stock.impl.repository.StockItemRepository
 import com.itmo.microservices.demo.users.api.service.UserService
 import io.micrometer.core.instrument.MeterRegistry
@@ -45,6 +46,7 @@ class DefaultOrderService(
     private val stockItemRepository: StockItemRepository,
     private val paymentRepository: PaymentRepository,
     private val StockService: StockItemService,
+    private val bookingRepository: BookingRepository,
     private val eventBus: EventBus,
     private val userService: UserService,
     private val meterRegistry: MeterRegistry
@@ -225,9 +227,9 @@ class DefaultOrderService(
         if (order.status == OrderStatus.BOOKED) {
             //unbook it
             finalized_order_request.increment()
-            order.status == OrderStatus.COLLECTING
+            order.status = OrderStatus.COLLECTING
             orderRepository.save(order)
-            orderItemsRepository.deleteByOrderId(order.id!!)
+            bookingRepository.deleteByOrderId(order.id!!)
         }
         if (order.status != OrderStatus.COLLECTING) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
