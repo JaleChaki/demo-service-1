@@ -121,7 +121,14 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
         }
 
 
-        val transaction = makeTransaction()
+        //val transaction = makeTransaction()
+        val transaction = JSONObject()
+        transaction.put("id",UUID.randomUUID())
+        transaction.put("status","SUCCESS")
+        transaction.put("cost",12)
+        transaction.put("submitTime",System.currentTimeMillis())
+        transaction.put("completedTime",System.currentTimeMillis())
+
 
         if (transaction.isEmpty) {
             eventBus.post(PaymentCreatedEvent(orderId,null, Status.FAILURE))
