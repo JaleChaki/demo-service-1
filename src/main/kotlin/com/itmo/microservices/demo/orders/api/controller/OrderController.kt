@@ -96,7 +96,8 @@ class OrderController(private val orderService: OrderService,
             security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun deliver(@PathVariable order_id: UUID, @RequestParam slot : Int): BookingDto {
-        eventBus.post(ReserveSlotEvent(order_id,slot))
+        deliveryService.reserveDeliverySlots(order_id,slot)
+        //eventBus.post(ReserveSlotEvent(order_id,slot))
         var order = orderRepository.findByIdOrNull(order_id) ?: return Order().toBookingDto(setOf())
         return order.toBookingDto(setOf())
     }
