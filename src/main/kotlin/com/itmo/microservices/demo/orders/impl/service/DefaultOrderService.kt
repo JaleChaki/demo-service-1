@@ -274,7 +274,7 @@ class DefaultOrderService(
     }
 
     override fun getOrder(orderId: UUID): OrderDto {
-        Thread.sleep(300) //DELETE ME LATER
+        Thread.sleep(600) //DELETE ME LATER
         val order = orderRepository.findByIdOrNull(orderId) ?: return Order().toDto(mapOf())
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_DESCRIPTION, order.toDto(mapOf(),
             paymentRepository.findByOrderId(orderId).toDto()))

@@ -210,7 +210,6 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
             "toState",OrderStatus.SHIPPING.toString()).increment()
         order.status = OrderStatus.SHIPPING
         orderRepository.updateDeliveryDuration(orderId,slotInSec)
-        Thread.sleep(300)
         shipping_orders_total.increment()
         eventLogger.info(DeliveryServiceNotableEvents.I_SLOT_ASSIGNED, listOf(orderId,slotInSec))
         eventBus.post(SlotReserveReponseEvent(orderId,slotInSec,Status.SUCCESS))

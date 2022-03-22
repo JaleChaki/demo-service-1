@@ -107,6 +107,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
             else FinancialOperationType.REFUND
             logs.add(UserAccountFinancialLogRecordDto(type, it.amount!!, it.orderId!!, it.transactionId!!, it.closeTime!!))
         }
+        logs.sortBy { it.timestamp }
 
         return logs
     }
