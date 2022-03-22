@@ -43,7 +43,6 @@ import kotlin.collections.ArrayList
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultOrderService(
-    private val entityManager: EntityManager,
     private val orderRepository: OrderRepository,
     private val orderItemsRepository: OrderItemsRepository,
     private val stockItemRepository: StockItemRepository,
@@ -278,8 +277,7 @@ class DefaultOrderService(
 
 
     override fun getOrder(orderId: UUID): OrderDto {
-        entityManager.flush()
-        entityManager.clear()
+        orderRepository.flush()
         //Thread.sleep(600) //DELETE ME LATER
         val order = orderRepository.findByIdOrNull(orderId) ?: return Order().toDto(mapOf())
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_DESCRIPTION, order.toDto(mapOf(),
