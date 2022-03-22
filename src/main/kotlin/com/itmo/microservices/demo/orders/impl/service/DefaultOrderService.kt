@@ -21,6 +21,7 @@ import com.itmo.microservices.demo.stock.api.event.BookingEvent
 import com.itmo.microservices.demo.stock.api.event.DeductItemEvent
 import com.itmo.microservices.demo.stock.api.model.BookingStatus
 import com.itmo.microservices.demo.stock.api.service.StockItemService
+import com.itmo.microservices.demo.stock.impl.entity.BookingLogRecord
 import com.itmo.microservices.demo.stock.impl.repository.BookingRepository
 import com.itmo.microservices.demo.stock.impl.repository.StockItemRepository
 import com.itmo.microservices.demo.users.api.service.UserService
@@ -134,12 +135,15 @@ class DefaultOrderService(
                         "item_book_request", "serviceName", "p04",
                         "result", "SUCCESS"
                     ).increment()
-                    eventBus.post(
-                        BookingEvent(
-                            order.id!!, item.itemId!!, BookingStatus.SUCCESS,
-                            (item.amount)!!.toInt(), System.currentTimeMillis()
-                        )
-                    )
+                    val booking = BookingLogRecord(null, order.id!!, item.itemId!!, BookingStatus.SUCCESS,
+                        (item.amount)!!.toInt(), System.currentTimeMillis())
+                    bookingRepository.save(booking)
+//                    eventBus.post(
+//                        BookingEvent(
+//                            order.id!!, item.itemId!!, BookingStatus.SUCCESS,
+//                            (item.amount)!!.toInt(), System.currentTimeMillis()
+//                        )
+//                    )
                 } else {
                     //itemBookRequest.labels("p04", "FAILED").inc()
                     meterRegistry.counter(
