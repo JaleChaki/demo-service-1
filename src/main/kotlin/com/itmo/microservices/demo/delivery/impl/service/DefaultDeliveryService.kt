@@ -208,7 +208,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         meterRegistry.counter("order_status_changed","serviceName","p04",
             "fromState",order!!.status.toString(),
             "toState",OrderStatus.SHIPPING.toString()).increment()
-        order.status = OrderStatus.SHIPPING
+        //order.status = OrderStatus.SHIPPING
         orderRepository.updateDeliveryDuration(orderId,slotInSec)
         shipping_orders_total.increment()
         eventLogger.info(DeliveryServiceNotableEvents.I_SLOT_ASSIGNED, listOf(orderId,slotInSec))
