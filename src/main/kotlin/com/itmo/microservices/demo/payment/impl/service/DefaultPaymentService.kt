@@ -109,6 +109,10 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
         }
         logs.sortBy { it.timestamp }
 
+        val order = orderRepository.findByIdOrNull(orderId)!!
+        order.status = OrderStatus.SHIPPING
+        orderRepository.save(order)
+
         return logs
     }
 
