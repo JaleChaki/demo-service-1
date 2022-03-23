@@ -287,7 +287,7 @@ class DefaultOrderService(
             orderItemsRepository.findByOrderId(orderId).map { it.itemId!! to it.amount!! }.toMap(),
             paymentRepository.findByOrderId(orderId).toDto()
         )
-        eventLogger.info(OrderServiceNotableEvents.I_ORDER_DESCRIPTION, listOf(orderDto.id,orderDto.status))
+        eventLogger.info(OrderServiceNotableEvents.I_ORDER_DESCRIPTION, listOf(orderDto.id,orderDto.status,orderDto.paymentHistory))
         return orderDto
     }
 
