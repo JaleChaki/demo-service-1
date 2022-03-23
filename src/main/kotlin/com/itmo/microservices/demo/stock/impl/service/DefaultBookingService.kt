@@ -39,7 +39,7 @@ class DefaultBookingService(private val bookingRepository: BookingRepository,
             for (i in 0..3){
                 logRecord = bookingRepository.findItem(id,record.itemId!!)
                 if (logRecord == null){
-                    Thread.sleep(500)
+                    bookingRepository.flush()
                     continue
                 }
                 break

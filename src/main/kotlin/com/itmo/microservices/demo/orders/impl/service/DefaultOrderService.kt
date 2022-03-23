@@ -282,14 +282,13 @@ class DefaultOrderService(
 
     override fun getOrder(orderId: UUID): OrderDto {
         orderRepository.flush()
-        //Thread.sleep(600) //DELETE ME LATER
         val order = orderRepository.findByIdOrNull(orderId) ?: return Order().toDto(mapOf())
-        eventLogger.info(OrderServiceNotableEvents.I_ORDER_DESCRIPTION, order.toDto(mapOf(),
-            paymentRepository.findByOrderId(orderId).toDto()))
-        return order.toDto(
+        val orderDto = order.toDto(
             orderItemsRepository.findByOrderId(orderId).map { it.itemId!! to it.amount!! }.toMap(),
             paymentRepository.findByOrderId(orderId).toDto()
         )
+        eventLogger.info(OrderServiceNotableEvents.I_ORDER_DESCRIPTION, listOf(orderDto.id,orderDto.status))
+        return orderDto
     }
 
     override fun requestDeductStockItems(orderId: UUID) {
