@@ -88,6 +88,10 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     override fun checkForRefund() {
         val orders = orderRepository.findAll()
         for (order in orders){
+            if (order.status == OrderStatus.PAID){
+                order.status = OrderStatus.SHIPPING
+                orderRepository.save(order)
+            }
             if (order.status == OrderStatus.SHIPPING){
                 atWork++
                 eventLogger.info(DeliveryServiceNotableEvents.I_REFUND_DO,order.toDto(mapOf()))
@@ -119,10 +123,6 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
                 orderRepository.save(order)
                 shipping_orders_total.increment()
                 atWork--
-            }
-            if (order.status == OrderStatus.PAID){
-                order.status = OrderStatus.SHIPPING
-                orderRepository.save(order)
             }
         }
     }
