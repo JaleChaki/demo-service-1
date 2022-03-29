@@ -26,10 +26,7 @@ import com.itmo.microservices.demo.orders.impl.util.toBookingDto
 import com.itmo.microservices.demo.orders.impl.util.toDto
 import com.itmo.microservices.demo.payment.impl.entity.Payment
 import com.itmo.microservices.demo.payment.impl.repository.PaymentRepository
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.DistributionSummary
-import io.micrometer.core.instrument.Gauge
-import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.*
 import kong.unirest.Unirest
 import kong.unirest.json.JSONObject
 import org.springframework.data.repository.findByIdOrNull
@@ -60,7 +57,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     var atWork = 0
 
     val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
-        "executorName","delivery").register(meterRegistry)
+        "executorName","delivery").register(Metrics.globalRegistry)
 
     val expiredDelivery : Counter = Counter.builder("expired_delivery_order")
         .tag("serviceName","p04")

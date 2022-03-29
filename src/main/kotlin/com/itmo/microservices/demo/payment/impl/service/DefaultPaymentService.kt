@@ -27,6 +27,7 @@ import com.itmo.microservices.demo.stock.api.event.DeductItemEvent
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Metrics
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -47,7 +48,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
     var atWork = 0
 
     val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
-        "executorName","payment").register(meterRegistry)
+        "executorName","payment").register(Metrics.globalRegistry)
 
     val refunded_money_amount: Counter = Counter.builder("refunded_money_amount")
         .tag("serviceName", "p04")
