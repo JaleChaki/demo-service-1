@@ -32,6 +32,7 @@ import javassist.NotFoundException
 import kong.unirest.HttpStatus
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.lang.Math.abs
@@ -95,10 +96,37 @@ class DefaultOrderService(
         .tag("serviceName", "p04")
         .description("Amount of times when finalized order is told to add a new item")
         .register(meterRegistry)
-    val abandoned_order_num_returned: Counter = Counter.builder("current_abandoned_order_returned_num")
+    val abandoned_order_num_returned = Gauge.builder("current_abandoned_order_returned_num",{ map.get(OrderStatus.COLLECTING) })
         .tag("serviceName", "p04")
         .description("Abandoned orders back to booking")
         .register(meterRegistry)
+
+    var map = orderRepository.findAll().groupingBy { it.status }.eachCount()
+    val collecting = Gauge.builder("orders_in_status", { map.get(OrderStatus.COLLECTING) }).tags(
+        "seviceName","p04",
+        "status","COLLECTING"
+    ).register(meterRegistry)
+    val booked = Gauge.builder("orders_in_status", { map.get(OrderStatus.BOOKED) }).tags(
+        "seviceName","p04",
+        "status","BOOKED"
+    ).register(meterRegistry)
+    val refund = Gauge.builder("orders_in_status", { map.get(OrderStatus.REFUND) }).tags(
+        "seviceName","p04",
+        "status","REFUND"
+    ).register(meterRegistry)
+    val discards = Gauge.builder("orders_in_status", { map.get(OrderStatus.DISCARD) }).tags(
+        "seviceName","p04",
+        "status","DISCARD"
+    ).register(meterRegistry)
+    val paid = Gauge.builder("orders_in_status", { map.get(OrderStatus.PAID) }).tags(
+        "seviceName","p04",
+        "status","PAID"
+    ).register(meterRegistry)
+
+    @Scheduled(fixedRate = 20000)
+    override fun countStatus() {
+        map = orderRepository.findAll().groupingBy { it.status }.eachCount()
+    }
 
 
     override fun book(orderId: UUID, user: UserDetails): BookingDto? {
@@ -159,7 +187,6 @@ class DefaultOrderService(
             "fromState", order.status.toString(),
             "toState", OrderStatus.BOOKED.toString()
         ).increment()
-        abandoned_order_num_returned.increment()
         order.status = OrderStatus.BOOKED
         //finalizationAttempt.labels("p04", "SUCCESS").inc()
         meterRegistry.counter(

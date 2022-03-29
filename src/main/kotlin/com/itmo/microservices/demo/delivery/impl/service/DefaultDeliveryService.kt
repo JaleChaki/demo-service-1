@@ -28,6 +28,7 @@ import com.itmo.microservices.demo.payment.impl.entity.Payment
 import com.itmo.microservices.demo.payment.impl.repository.PaymentRepository
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import kong.unirest.Unirest
 import kong.unirest.json.JSONObject
@@ -55,6 +56,11 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     private lateinit var eventLogger: EventLogger
 
     private var httpClient : HttpClient = HttpClient.newBuilder().executor(ExecutorsFactory.executor()).build()
+
+    var atWork = 0
+
+    val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
+        "executorName","delivery").register(meterRegistry)
 
     val expiredDelivery : Counter = Counter.builder("expired_delivery_order")
         .tag("serviceName","p04")
@@ -86,6 +92,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         val orders = orderRepository.findAll()
         for (order in orders){
             if (order.status == OrderStatus.SHIPPING){
+                atWork++
                 eventLogger.info(DeliveryServiceNotableEvents.I_REFUND_DO,order.toDto(mapOf()))
                 val withdraw = paymentRepository.findByOrderId(order.id!!)
                 val payment = Payment()
@@ -105,6 +112,8 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
                 paymentRepository.save(payment)
 
+                meterRegistry.counter("refunded_money_amount","serviceName","p04",
+                "refundReason","DELIVERY_FAILED").increment(payment.amount!!.toDouble())
                 meterRegistry.counter("order_status_changed","serviceName","p04",
                     "fromState",order.status.toString(),
                     "toState",OrderStatus.REFUND.toString()).increment()
@@ -112,6 +121,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
                 expiredDelivery.increment()
                 orderRepository.save(order)
                 shipping_orders_total.increment()
+                atWork--
             }
         }
     }
@@ -160,7 +170,9 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
             throw InvalidNumberOfSlotsException()
         }
         //access API, this transaction imitates receiving information about available slots
+        atWork++
         val json = transaction()
+        atWork--
         //calculate all available slots, choose number of first
         val temp : List<Int> = listOf(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30).minus(deliveryRepository.getAllSlots()
             .toSet())// some magic
@@ -180,7 +192,9 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         if (slotInSec <= 0){
             throw InvalidSlotException()
         }
-        //val json = transaction()
+        atWork++
+        val json = transaction()
+        atWork--
         var order = orderRepository.findByIdOrNull(orderId)
 //        if (order == null || !(order.status.equals(OrderStatus.PAID) || order.status.equals((OrderStatus.REFUND)))){
 //            eventBus.post(SlotReserveReponseEvent(orderId,slotInSec,Status.FAILURE))

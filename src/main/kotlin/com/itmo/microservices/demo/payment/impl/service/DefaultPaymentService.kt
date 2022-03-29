@@ -25,6 +25,7 @@ import kong.unirest.json.JSONObject
 import com.itmo.microservices.demo.payment.impl.util.PaymentServiceMeta
 import com.itmo.microservices.demo.stock.api.event.DeductItemEvent
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -42,6 +43,11 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
+
+    var atWork = 0
+
+    val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
+        "executorName","payment").register(meterRegistry)
 
     val refunded_money_amount: Counter = Counter.builder("refunded_money_amount")
         .tag("serviceName", "p04")
@@ -127,7 +133,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
             return PaymentSubmissionDto(0, UUID.fromString("0-0-0-0-0"))
         }
 
-
+        atWork++
         //val transaction = makeTransaction()
         val transaction = JSONObject()
         transaction.put("id",UUID.randomUUID())
@@ -135,7 +141,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
         transaction.put("cost",12)
         transaction.put("submitTime",System.currentTimeMillis())
         transaction.put("completedTime",System.currentTimeMillis())
-
+        atWork--
 
         if (transaction.isEmpty) {
             eventBus.post(PaymentCreatedEvent(orderId,null, Status.FAILURE))

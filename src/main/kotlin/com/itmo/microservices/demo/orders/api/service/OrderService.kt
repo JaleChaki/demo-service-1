@@ -15,5 +15,6 @@ interface OrderService {
     fun requestDeductStockItems(orderId: UUID)
     fun deleteOrder(orderId : UUID) : Boolean
     fun changeOrderStatusToPaid(orderId: UUID)
+    fun countStatus()
 //    fun assignPayment(orderId : UUID, payment : PaymentModel)
 }
