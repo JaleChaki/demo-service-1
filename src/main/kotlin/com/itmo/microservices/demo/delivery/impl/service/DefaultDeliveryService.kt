@@ -120,6 +120,10 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
                 shipping_orders_total.increment()
                 atWork--
             }
+            if (order.status == OrderStatus.PAID){
+                order.status = OrderStatus.SHIPPING
+                orderRepository.save(order)
+            }
         }
     }
 
