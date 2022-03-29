@@ -316,6 +316,6 @@ class DefaultOrderService(
 
         val order = orderRepository.findByIdOrNull(orderId)
 
-        orderRepository.save(orderDto.toEntity(order!!.userId))
+        orderRepository.saveAndFlush(orderDto.toEntity(order!!.userId))
     }
 }
