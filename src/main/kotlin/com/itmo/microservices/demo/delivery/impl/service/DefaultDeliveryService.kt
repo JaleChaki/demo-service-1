@@ -110,11 +110,10 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
                         payment.amount = payment.amount!! + record.amount!!
                     }
                 }
+                meterRegistry.counter("refunded_money_amount","serviceName","p04",
+                    "refundReason","DELIVERY_FAILED").increment(payment.amount!!.toDouble())
 
                 paymentRepository.save(payment)
-
-                meterRegistry.counter("refunded_money_amount","serviceName","p04",
-                "refundReason","DELIVERY_FAILED").increment(payment.amount!!.toDouble())
                 meterRegistry.counter("order_status_changed","serviceName","p04",
                     "fromState",order.status.toString(),
                     "toState",OrderStatus.REFUND.toString()).increment()
