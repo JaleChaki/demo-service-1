@@ -44,7 +44,7 @@ class OrderController(private val orderService: OrderService,
 
     @PostMapping("/orders")
     @Operation(
-            summary = "Creates new order v2",
+            summary = "Creates new order",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
