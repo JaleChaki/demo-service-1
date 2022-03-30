@@ -48,7 +48,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
     var atWork = 0
 
     val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
-        "executorName","payment").register(meterRegistry)
+        "executorName","payment").description("queue for payment executor").register(meterRegistry)
 
     val refunded_money_amount: Counter = Counter.builder("refunded_money_amount")
         .tag("serviceName", "p04")

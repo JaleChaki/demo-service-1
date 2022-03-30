@@ -57,7 +57,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     var atWork = 0
 
     val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
-        "executorName","delivery").register(meterRegistry)
+        "executorName","delivery").description("queue of delivery executor").register(meterRegistry)
 
     val expiredDelivery : Counter = Counter.builder("expired_delivery_order")
         .tag("serviceName","p04")

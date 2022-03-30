@@ -99,30 +99,31 @@ class DefaultOrderService(
         .register(meterRegistry)
     val abandoned_order_num_returned = Gauge.builder("current_abandoned_order_returned_num",{ map.get(OrderStatus.COLLECTING) })
         .tag("serviceName", "p04")
-        .description("Abandoned orders back to booking")
+        .description("gauge of abandoned orders back to booking")
         .register(meterRegistry)
 
     var map = orderRepository.findAll().groupingBy { it.status }.eachCount()
     val collecting = Gauge.builder("orders_in_status", { map.get(OrderStatus.COLLECTING) }).tags(
         "seviceName","p04",
-        "status","COLLECTING"
-    ).register(meterRegistry)
+        "status","COLLECTING")
+        .description("How many orders are COLLECTING")
+        .register(meterRegistry)
     val booked = Gauge.builder("orders_in_status", { map.get(OrderStatus.BOOKED) }).tags(
         "seviceName","p04",
         "status","BOOKED"
-    ).register(meterRegistry)
+    ).description("How many orders are BOOKED").register(meterRegistry)
     val refund = Gauge.builder("orders_in_status", { map.get(OrderStatus.REFUND) }).tags(
         "seviceName","p04",
         "status","REFUND"
-    ).register(meterRegistry)
+    ).description("How many orders are REFUND").register(meterRegistry)
     val discards = Gauge.builder("orders_in_status", { map.get(OrderStatus.DISCARD) }).tags(
         "seviceName","p04",
         "status","DISCARD"
-    ).register(meterRegistry)
+    ).description("How many orders are DISCARD").register(meterRegistry)
     val paid = Gauge.builder("orders_in_status", { map.get(OrderStatus.PAID) }).tags(
         "seviceName","p04",
         "status","PAID"
-    ).register(meterRegistry)
+    ).description("How many orders are PAID").register(meterRegistry)
 
     @Scheduled(fixedRate = 20000)
     override fun countStatus() {
