@@ -18,8 +18,9 @@ interface OrderRepository : JpaRepository<Order, UUID> {
     @Query("FROM Order WHERE deliveryDuration >= ?1 AND deliveryDuration <= ?2")
     fun findInWindow(start: Int, end: Int): List<Order>
 
-    @Query("FROM Order u WHERE u.status = ?1")
-    fun findOrdersWithStatus(status: OrderStatus) : List<Order>
+    @Query("SELECT * FROM orders WHERE status = ?1",
+    nativeQuery = true)
+    fun findOrdersWithStatus(status: String) : List<Order>
 
     @Transactional
     @Modifying(flushAutomatically = true)

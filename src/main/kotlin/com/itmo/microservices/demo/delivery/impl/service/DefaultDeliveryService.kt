@@ -57,7 +57,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     var atWork = 0
 
     val executorWork = Gauge.builder("executor_service",{atWork}).tags("serviceName","p04",
-        "executorName","delivery").register(Metrics.globalRegistry)
+        "executorName","delivery").register(meterRegistry)
 
     val expiredDelivery : Counter = Counter.builder("expired_delivery_order")
         .tag("serviceName","p04")
@@ -86,7 +86,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
     @Scheduled(fixedRate = 2000)
     override fun checkForRefund() {
-        val orders = orderRepository.findOrdersWithStatus(OrderStatus.PAID)
+        val orders = orderRepository.findOrdersWithStatus("3")
         for (order in orders){
             if (order.status == OrderStatus.PAID){
                 order.status = OrderStatus.SHIPPING
