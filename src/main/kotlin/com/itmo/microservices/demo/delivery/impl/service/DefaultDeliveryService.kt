@@ -84,13 +84,13 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         .description("Current shipping orders")
         .register(meterRegistry)
 
-    @Scheduled(fixedRate = 2000)
+    @Scheduled(fixedRate = 2500)
     override fun checkForRefund() {
         val orders = orderRepository.findOrdersWithStatus("3")
         for (order in orders){
             if (order.status == OrderStatus.PAID){
                 order.status = OrderStatus.SHIPPING
-                orderRepository.save(order)
+                //orderRepository.save(order)
             }
             if (order.status == OrderStatus.SHIPPING){
                 atWork++
@@ -110,16 +110,17 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
                         payment.amount = payment.amount!! + record.amount!!
                     }
                 }
+
+
+                order.status = OrderStatus.REFUND
+                paymentRepository.save(payment)
+                orderRepository.save(order)
                 meterRegistry.counter("refunded_money_amount","serviceName","p04",
                     "refundReason","DELIVERY_FAILED").increment(payment.amount!!.toDouble())
-
-                paymentRepository.save(payment)
                 meterRegistry.counter("order_status_changed","serviceName","p04",
                     "fromState",order.status.toString(),
                     "toState",OrderStatus.REFUND.toString()).increment()
-                order.status = OrderStatus.REFUND
                 expiredDelivery.increment()
-                orderRepository.save(order)
                 shipping_orders_total.increment()
                 atWork--
             }
