@@ -292,7 +292,7 @@ class DefaultOrderService(
 //                return ResponseEntity.status(HttpStatus.OK).body(null)
 //            }
 //        }
-        orderItemsRepository.save(OrderItems(null, orderId, itemId, amount))
+        //orderItemsRepository.save(OrderItems(null, orderId, itemId, amount))
         return ResponseEntity.status(HttpStatus.OK).body(null)
 
         //        var order = orderRepository.findByIdOrNull(orderId) ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
